@@ -8,8 +8,10 @@ from portfolio import Portfolio
 #       5 USD + 10 USD = 15 USD
 #       Remove redudant Money multipication tests
 
-# 5 USD + 10 EUR = 17 USD    because 1 EUR = 1.2 USD
+#       5 USD + 10 EUR = 17 USD    because 1 EUR = 1.2 USD
 # 1 USD + 1100 KRW = 2200 KRW because 1 USD = 1100 KRW
+# Determine exchange rate based on the currencies involved(from to)
+# Allow exchange rates to be modified
 
 
 class TestMoney(unittest.TestCase):
@@ -39,8 +41,17 @@ class TestMoney(unittest.TestCase):
         expectedValue = Money(17, "USD")
         actualValue = pf.evaluate("USD")
         self.assertEqual(
-            expectedValue, actualValue, "%s ! %s" % (expectedValue, actualValue)
+            expectedValue, actualValue, "%s != %s" % (expectedValue, actualValue)
         )
+
+    def testAdditionOfDollarsAndWon(self):
+        oneDollar = Money(1, "USD")
+        koreanWons = Money(1100, "KRW")
+        pf = Portfolio()
+        pf.add(oneDollar, koreanWons)
+        expected = Money(2200, "KRW")
+        actual = pf.evaluate("KRW")
+        self.assertEqual(expected, actual, "%s != %s" % (expected, actual))
 
 
 if __name__ == "__main__":
