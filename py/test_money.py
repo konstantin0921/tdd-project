@@ -6,9 +6,10 @@ from portfolio import Portfolio
 #       10 EUR * 2 = 20 EUR
 #       4002 KRW / 4 = 1000.5 KRW
 #       5 USD + 10 USD = 15 USD
+#       Remove redudant Money multipication tests
+
 # 5 USD + 10 EUR = 17 USD    because 1 EUR = 1.2 USD
 # 1 USD + 1100 KRW = 2200 KRW because 1 USD = 1100 KRW
-# Remove redudant Money multipication tests
 
 
 class TestMoney(unittest.TestCase):
@@ -29,6 +30,17 @@ class TestMoney(unittest.TestCase):
         portfolio = Portfolio()
         portfolio.add(fiveDollars, tenDollars)
         self.assertEqual(portfolio.evaluate("USD"), fifteenDollars)
+
+    def testAdditionOfDollarsAndEuros(self):
+        fiveDollars = Money(5, "USD")
+        tenEuros = Money(10, "EUR")
+        pf = Portfolio()
+        pf.add(fiveDollars, tenEuros)
+        expectedValue = Money(17, "USD")
+        actualValue = pf.evaluate("USD")
+        self.assertEqual(
+            expectedValue, actualValue, "%s ! %s" % (expectedValue, actualValue)
+        )
 
 
 if __name__ == "__main__":
