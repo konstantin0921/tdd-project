@@ -14,7 +14,7 @@ from bank import Bank
 #       Determine exchange rate based on the currencies involved(from to)
 
 #       improve error handling when exchange rate is not defined
-# Improve the implementation of exchange rates
+#       Improve the implementation of exchange rates
 # Allow exchange rates to be modified
 
 
@@ -72,17 +72,22 @@ class TestMoney(unittest.TestCase):
         ):
             pf.evaluate(self.bank, "kalganid")
 
-    def testConversion(self):
-        bank = Bank()
-        bank.addExchangeRate("EUR", "USD", 1.2)
+    def testConversionWithDifferentRatesBetweenTwoCurrencies(self):
         tenEuros = Money(10, "EUR")
-        self.assertEqual(bank.convert(tenEuros, "USD"), Money(12, "USD"))
+        self.assertEqual(self.bank.convert(tenEuros, "USD"), Money(12, "USD"))
+
+        self.bank.addExchangeRate("EUR", "USD", 1.3)
+        self.assertEqual(self.bank.convert(tenEuros, "USD"), Money(13, "USD"))
 
     def testConversionWithMissingExchangeRate(self):
         bank = Bank()
         tenEuros = Money(10, "EUR")
         with self.assertRaisesRegex(Exception, "EUR->Kalganid"):
             bank.convert(tenEuros, "Kalganid")
+
+    # def testWhatIsTheConversionRateFromEURToUSD(self):
+    #     tenEuros = Money(10, "EUR")
+    #     self.assertEqual(self.bank.convert(tenEuros, "USD"), Money(12, "USD"))
 
 
 if __name__ == "__main__":
