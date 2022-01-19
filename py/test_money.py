@@ -1,6 +1,7 @@
 import unittest
 from money import Money
 from portfolio import Portfolio
+from bank import Bank
 
 #       5 USD * 2 = 10 USD
 #       10 EUR * 2 = 20 EUR
@@ -11,11 +12,18 @@ from portfolio import Portfolio
 #       5 USD + 10 EUR = 17 USD    because 1 EUR = 1.2 USD
 #       1 USD + 1100 KRW = 2200 KRW because 1 USD = 1100 KRW
 #       Determine exchange rate based on the currencies involved(from to)
-# Allow exchange rates to be modified
+
 #       improve error handling when exchange rate is not defined
+# Improve the implementation of exchange rates
+# Allow exchange rates to be modified
 
 
 class TestMoney(unittest.TestCase):
+    def setUp(self):
+        self.bank = Bank()
+        self.bank.addExchangeRate("EUR", "USD", 1.2)
+        self.bank.addExchangeRate("USD", "KRW", 1100)
+
     def testMultiplication(self):
         fiveDollars = Money(5, "USD")
         tenDollars = Money(10, "USD")
@@ -32,7 +40,7 @@ class TestMoney(unittest.TestCase):
         fifteenDollars = Money(15, "USD")
         portfolio = Portfolio()
         portfolio.add(fiveDollars, tenDollars)
-        self.assertEqual(portfolio.evaluate("USD"), fifteenDollars)
+        self.assertEqual(portfolio.evaluate(self.bank, "USD"), fifteenDollars)
 
     def testAdditionOfDollarsAndEuros(self):
         fiveDollars = Money(5, "USD")
@@ -40,7 +48,7 @@ class TestMoney(unittest.TestCase):
         pf = Portfolio()
         pf.add(fiveDollars, tenEuros)
         expected = Money(17, "USD")
-        actual = pf.evaluate("USD")
+        actual = pf.evaluate(self.bank, "USD")
         self.assertEqual(expected, actual, "%s != %s" % (expected, actual))
 
     def testAdditionOfDollarsAndWon(self):
@@ -49,7 +57,7 @@ class TestMoney(unittest.TestCase):
         pf = Portfolio()
         pf.add(oneDollar, koreanWons)
         expected = Money(2200, "KRW")
-        actual = pf.evaluate("KRW")
+        actual = pf.evaluate(self.bank, "KRW")
         self.assertEqual(expected, actual, "%s != %s" % (expected, actual))
 
     def testAdditionWithMultipleMissingExchangeRates(self):
@@ -62,7 +70,19 @@ class TestMoney(unittest.TestCase):
             Exception,
             r"Missing exchange rate\(s\):\[USD->kalganid,EUR->kalganid,KRW->kalganid\]",
         ):
-            pf.evaluate("kalganid")
+            pf.evaluate(self.bank, "kalganid")
+
+    def testConversion(self):
+        bank = Bank()
+        bank.addExchangeRate("EUR", "USD", 1.2)
+        tenEuros = Money(10, "EUR")
+        self.assertEqual(bank.convert(tenEuros, "USD"), Money(12, "USD"))
+
+    def testConversionWithMissingExchangeRate(self):
+        bank = Bank()
+        tenEuros = Money(10, "EUR")
+        with self.assertRaisesRegex(Exception, "EUR->Kalganid"):
+            bank.convert(tenEuros, "Kalganid")
 
 
 if __name__ == "__main__":

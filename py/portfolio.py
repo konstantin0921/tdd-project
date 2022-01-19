@@ -1,4 +1,6 @@
 from money import Money
+from bank import Bank
+from typing import Union
 
 
 class Portfolio:
@@ -9,27 +11,14 @@ class Portfolio:
     def add(self, *moneys):
         self.moneys.extend(moneys)
 
-    def __convert(self, aMoney: Money, aCurrency: str) -> float:
-
-        exchangeRates = {
-            "EUR->USD": 1.2,
-            "USD->KRW": 1100,
-        }
-
-        if aMoney.currency == aCurrency:
-            return aMoney.amount
-        else:
-            k = aMoney.currency + "->" + aCurrency
-            return aMoney.amount * exchangeRates[k]
-
-    def evaluate(self, currency: str):
+    def evaluate(self, bank: Bank, currency: str) -> Union[Money, Exception]:
         total = 0.0
         failures = []
         for m in self.moneys:
             try:
-                total += self.__convert(m, currency)
-            except KeyError as ke:
-                failures.append(ke)
+                total += bank.convert(m, currency).amount
+            except Exception as ex:
+                failures.append(ex)
 
         if not failures:
             return Money(total, currency)
